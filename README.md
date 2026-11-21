@@ -11,9 +11,14 @@ or press and hold on the map, and the forecast for the week appears.
 It is one of a set of builds of the same app, alongside
 [flutter-weather](https://github.com/calemccammon/flutter-weather),
 [react-native-weather](https://github.com/calemccammon/react-native-weather),
-[kmp-weather](https://github.com/calemccammon/kmp-weather) and
-[maui-weather](https://github.com/calemccammon/maui-weather),
+[kmp-weather](https://github.com/calemccammon/kmp-weather),
+[maui-weather](https://github.com/calemccammon/maui-weather) and
+[capacitor-weather](https://github.com/calemccammon/capacitor-weather),
 to compare the frameworks.
+
+capacitor-weather is Capacitor without Ionic: a Vue app with Google's
+Material Web components. This build is Capacitor under Ionic's own
+components, with Angular.
 
 ## What it does
 
