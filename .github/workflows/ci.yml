@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # ESLint (with the rules that keep the layers apart), the type check of
+      # the browser tests, and Prettier.
+      - run: npm run lint
+      - run: npm run test:unit
+      # The whole screen in a real browser, at phone and wide sizes, with the
+      # network stood in for.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 14
+
+  build-web:
+    name: Build web
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ionic-weather-web
+          path: www
+          retention-days: 14
+
+  # The native build is slow, so it runs on main and on demand, not on every
+  # pull request.
+  build-android:
+    name: Build Android APK
+    needs: check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run build:android
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ionic-weather-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14

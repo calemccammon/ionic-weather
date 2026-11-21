@@ -11,12 +11,14 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'on-first-retry',
+    locale: 'en-US',
+    // The map draws with WebGL, which a headless browser has only in software.
+    launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] },
   },
+  // The same tests at both of the app's layouts.
   projects: [
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 7'] },
-    },
+    { name: 'phone', use: { ...devices['Pixel 7'] } },
+    { name: 'wide', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
   ],
   webServer: {
     command: 'npm start -- --port 4200',

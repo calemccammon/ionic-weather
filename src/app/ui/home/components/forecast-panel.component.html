@@ -1,0 +1,91 @@
+@let shown = state();
+
+@if (shown.place; as place) {
+  <header>
+    <h1>{{ place.title }}</h1>
+    @if (place.subtitle !== '') {
+      <p class="muted">{{ place.subtitle }}</p>
+    }
+  </header>
+}
+
+@let forecast = shown.forecast;
+@if (forecast.kind === 'loaded') {
+  <!-- Read out as one sentence. Wraps onto a second line when the text is
+       too large for one. -->
+  <section class="current" role="group" [attr.aria-label]="forecast.forecast.current.description">
+    <div class="temperature" aria-hidden="true">
+      <ion-icon [name]="forecast.forecast.current.icon" />
+      <span>{{ forecast.forecast.current.temperature }}</span>
+    </div>
+    <div aria-hidden="true">
+      <p class="title">{{ forecast.forecast.current.condition }}</p>
+      <p class="muted">{{ forecast.forecast.current.feelsLike }}</p>
+      <p class="muted">{{ forecast.forecast.current.wind }}</p>
+    </div>
+  </section>
+
+  <!-- The units choice drops below the heading when the text is too large
+       for both on one line. -->
+  <div class="week-heading">
+    <h2>{{ m.forecast.thisWeek }}</h2>
+    <ion-segment
+      [value]="shown.units"
+      [attr.aria-label]="m.units.label"
+      (ionChange)="onUnitsChange($event.detail.value)"
+    >
+      <ion-segment-button value="celsius" [attr.aria-label]="m.units.celsiusName">{{
+        m.units.celsius
+      }}</ion-segment-button>
+      <ion-segment-button value="fahrenheit" [attr.aria-label]="m.units.fahrenheitName">{{
+        m.units.fahrenheit
+      }}</ion-segment-button>
+    </ion-segment>
+  </div>
+
+  @if (forecast.forecast.days.length === 0) {
+    <p>{{ m.forecast.noDays }}</p>
+  } @else {
+    <ul class="week">
+      @for (day of forecast.forecast.days; track day.key) {
+        <!-- Read out as one sentence. -->
+        <li [attr.aria-label]="day.description">
+          <span class="day" aria-hidden="true">{{ day.dayLabel }}</span>
+          <ion-icon [name]="day.icon" aria-hidden="true" />
+          <span class="chance" aria-hidden="true">{{ day.chance }}</span>
+          <span class="low" aria-hidden="true">{{ day.low }}</span>
+          <span class="bar" aria-hidden="true" [style.--start]="day.barStart" [style.--end]="day.barEnd"></span>
+          <span class="high" aria-hidden="true">{{ day.high }}</span>
+        </li>
+      }
+    </ul>
+  }
+
+  <p class="credit">{{ m.forecast.credit }}</p>
+} @else {
+  <!-- What is happening is read out by a screen reader as it changes:
+       loading, then failed. -->
+  <div class="status" aria-live="polite">
+    @switch (forecast.kind) {
+      @case ('idle') {
+        <div class="message">
+          <ion-icon class="hint" name="hand-left-outline" aria-hidden="true" />
+          <span>{{ m.forecast.hint }}</span>
+        </div>
+      }
+      @case ('loading') {
+        <ion-progress-bar type="indeterminate" [attr.aria-label]="m.forecast.loading" />
+      }
+      @case ('failed') {
+        <div class="message">
+          <ion-icon class="error" name="cloud-offline-outline" aria-hidden="true" />
+          <span>{{ forecast.message }}</span>
+        </div>
+        <ion-button fill="solid" shape="round" color="secondary" (click)="retry.emit()">
+          <ion-icon slot="start" name="refresh" aria-hidden="true" />
+          {{ m.tryAgain }}
+        </ion-button>
+      }
+    }
+  </div>
+}

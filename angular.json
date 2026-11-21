@@ -23,7 +23,9 @@
               "browser": ""
             },
             "index": "src/index.html",
-            "polyfills": [],
+            "polyfills": [
+              "@angular/localize/init"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -33,9 +35,16 @@
                 "output": "assets"
               }
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "styles": [
+              "src/global.scss",
+              "src/theme/variables.scss",
+              "node_modules/maplibre-gl/dist/maplibre-gl.css"
+            ],
             "scripts": [],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "allowedCommonJsDependencies": [
+              "maplibre-gl"
+            ]
           },
           "configurations": {
             "production": {
@@ -47,8 +56,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
                 }
               ],
               "fileReplacements": [
@@ -97,7 +106,9 @@
           "options": {
             "buildTarget": "::development",
             "runnerConfig": "vitest.config.mts",
-            "setupFiles": ["src/test-setup.ts"],
+            "setupFiles": [
+              "src/test-setup.ts"
+            ],
             "tsConfig": "tsconfig.spec.json"
           }
         },
@@ -116,7 +127,9 @@
     }
   },
   "cli": {
-    "schematicCollections": ["@ionic/angular-toolkit"]
+    "schematicCollections": [
+      "@ionic/angular-toolkit"
+    ]
   },
   "schematics": {
     "@ionic/angular-toolkit:component": {
