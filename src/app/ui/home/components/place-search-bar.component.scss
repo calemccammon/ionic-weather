@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.bar {
+  border-radius: var(--app-shape-extra-large);
+  background: var(--app-surface-container-high);
+  box-shadow: var(--app-elevation-3);
+  overflow: hidden;
+}
+
+ion-searchbar {
+  // The bar is the search field's whole look: no second box inside it.
+  --background: transparent;
+  --box-shadow: none;
+  --border-radius: var(--app-shape-extra-large);
+  padding: 0 var(--app-space-xs);
+  min-height: 56px;
+}
+
+.results {
+  border-top: 1px solid var(--app-outline-variant);
+  max-height: var(--results-max-height, 50vh);
+  overflow-y: auto;
+}
+
+ion-list,
+ion-item {
+  --background: transparent;
+  background: transparent;
+}
+
+.status {
+  min-height: 4px;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-lg);
+  padding: var(--app-space-md) var(--app-space-lg);
+  color: var(--app-on-surface-variant);
+
+  span {
+    flex: 1;
+  }
+
+  ion-icon {
+    font-size: 24px;
+    flex: none;
+  }
+}

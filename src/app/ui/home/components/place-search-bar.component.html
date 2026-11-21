@@ -1,0 +1,63 @@
+<div class="bar" [class.open]="open()">
+  <ion-searchbar
+    [value]="text()"
+    [placeholder]="m.search.hint"
+    [debounce]="0"
+    [showClearButton]="placeTitle() !== null && !open() ? 'always' : 'never'"
+    [attr.aria-label]="m.search.hint"
+    (ionFocus)="onFocus()"
+    (ionInput)="onInput($event.detail.value)"
+    (ionClear)="onClear()"
+    (keydown.escape)="open.set(false)"
+  />
+
+  @if (open()) {
+    <div class="results">
+      @let state = search();
+      @if (state.kind === 'results') {
+        <ion-list lines="none">
+          @for (place of state.places; track $index) {
+            <ion-item button [detail]="false" (click)="onChoose($index)">
+              <ion-icon slot="start" name="location-outline" aria-hidden="true" />
+              <ion-label>
+                <h2>{{ place.title }}</h2>
+                @if (place.subtitle !== '') {
+                  <p>{{ place.subtitle }}</p>
+                }
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <!-- What is happening is read out by a screen reader as it changes:
+             searching, then what came of it. -->
+        <div class="status" aria-live="polite">
+          @switch (state.kind) {
+            @case ('idle') {
+              <div class="message">
+                <ion-icon name="earth-outline" aria-hidden="true" />
+                <span>{{ m.search.prompt }}</span>
+              </div>
+            }
+            @case ('loading') {
+              <ion-progress-bar type="indeterminate" [attr.aria-label]="m.search.searching" />
+            }
+            @case ('empty') {
+              <div class="message">
+                <ion-icon name="search-outline" aria-hidden="true" />
+                <span>{{ m.search.nothingFound(state.query) }}</span>
+              </div>
+            }
+            @case ('failed') {
+              <div class="message">
+                <ion-icon name="cloud-offline-outline" aria-hidden="true" />
+                <span>{{ state.message }}</span>
+                <ion-button fill="clear" (click)="retry.emit()">{{ m.tryAgain }}</ion-button>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

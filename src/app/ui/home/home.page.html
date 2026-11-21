@@ -1,0 +1,57 @@
+<ion-content [fullscreen]="true" [scrollY]="false">
+  <app-weather-map
+    [pin]="pin()"
+    [covered]="covered()"
+    [dark]="dark()"
+    (longPress)="home.selectPoint($event.latitude, $event.longitude)"
+  />
+
+  <!-- The map's makers ask for their credit to stay visible. -->
+  <p class="credit" [class.above-sheet]="!isWide()">{{ m.map.credit }}</p>
+
+  @if (isWide()) {
+  <!-- The sheet's look, rounded on every corner since it floats clear of
+         the window's edges. -->
+  <section class="side-panel">
+    <app-forecast-panel [state]="home.state()" (unitsChange)="home.setUnits($event)" (retry)="home.retryForecast()" />
+  </section>
+  } @else {
+  <!-- A sheet that is always there: it cannot be dismissed, and the map
+         behind it stays usable until it is pulled right up. -->
+  <ion-modal
+    class="forecast-sheet"
+    [isOpen]="true"
+    [breakpoints]="sheetBreakpoints"
+    [initialBreakpoint]="sheetStops.resting"
+    [backdropBreakpoint]="1"
+    [backdropDismiss]="false"
+    [canDismiss]="false"
+    [focusTrap]="false"
+    [handle]="true"
+  >
+    <ng-template>
+      <app-forecast-panel [state]="home.state()" (unitsChange)="home.setUnits($event)" (retry)="home.retryForecast()" />
+    </ng-template>
+  </ion-modal>
+  }
+
+  <!-- A press anywhere else closes the search results. This is for a finger
+       or a mouse only: from the keyboard, Escape in the search bar does it. -->
+  @if (searchOpen()) {
+
+  <div class="scrim" aria-hidden="true" (click)="onSearchOpenChange(false)"></div>
+  }
+
+  <!-- Last, so its results lie over everything else. -->
+  <app-place-search-bar
+    [class.wide]="isWide()"
+    [placeTitle]="home.state().place?.title ?? null"
+    [search]="search.state()"
+    [open]="searchOpen()"
+    (openChange)="onSearchOpenChange($event)"
+    (queryChange)="search.queryChanged($event)"
+    (choose)="search.choose($event)"
+    (retry)="search.retry()"
+    (clearPlace)="home.clear()"
+  />
+</ion-content>

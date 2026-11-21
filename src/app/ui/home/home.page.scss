@@ -1,0 +1,55 @@
+// Sizes shared with home.page.ts, which tells the map what covers it.
+$side-panel-width: 400px;
+$search-bar-height: 56px;
+$margin: 16px;
+$gap: 12px;
+
+app-place-search-bar {
+  position: absolute;
+  top: calc(var(--ion-safe-area-top, 0px) + #{$margin});
+  left: calc(var(--ion-safe-area-left, 0px) + #{$margin});
+  right: calc(var(--ion-safe-area-right, 0px) + #{$margin});
+  // Above the forecast sheet, which Ionic presents over the page.
+  z-index: 30000;
+
+  &.wide {
+    right: auto;
+    width: $side-panel-width;
+  }
+}
+
+.side-panel {
+  position: absolute;
+  top: calc(var(--ion-safe-area-top, 0px) + #{$margin + $search-bar-height + $gap});
+  bottom: calc(var(--ion-safe-area-bottom, 0px) + #{$margin});
+  left: calc(var(--ion-safe-area-left, 0px) + #{$margin});
+  width: $side-panel-width;
+  border-radius: var(--app-shape-extra-large);
+  background: var(--app-surface-container-low);
+  box-shadow: var(--app-elevation-1);
+  overflow: hidden;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 29999;
+}
+
+.credit {
+  position: absolute;
+  right: calc(var(--ion-safe-area-right, 0px) + var(--app-space-sm));
+  bottom: calc(var(--ion-safe-area-bottom, 0px) + var(--app-space-sm));
+  margin: 0;
+  padding: var(--app-space-xxs) var(--app-space-xs);
+  border-radius: var(--app-shape-extra-small);
+  background: color-mix(in srgb, var(--app-surface) 80%, transparent);
+  color: var(--app-on-surface);
+  font-size: 0.6875rem;
+  pointer-events: none;
+
+  // On a phone the sheet covers the bottom corner: just above where it rests.
+  &.above-sheet {
+    bottom: calc(30% + var(--app-space-sm));
+  }
+}
