@@ -1,6 +1,6 @@
-import { sampleForecast } from '../../testing/fakes';
+import { day, sampleForecast } from '../../testing/fakes';
 
-import { isToday } from './forecast';
+import { forecastInUnits, isToday } from './forecast';
 import { normalizeLongitude, placeFromCoordinates } from './place';
 import { unitsForCountry } from './units';
 
@@ -54,5 +54,36 @@ describe('a forecast', () => {
       false,
       false,
     ]);
+  });
+});
+
+describe('a forecast in other units', () => {
+  const metric = sampleForecast({ days: [{ ...day(20, 0, 10), precipitationChance: 46 }, day(21, -40, 100)] });
+  const imperial = forecastInUnits(
+    { ...metric, current: { ...metric.current, temperature: 10, feelsLike: -40, windSpeed: 20 } },
+    'imperial',
+  );
+
+  it('has its temperatures in Fahrenheit', () => {
+    expect(imperial.current.temperature).toBeCloseTo(50, 9);
+    expect(imperial.current.feelsLike).toBeCloseTo(-40, 9);
+    expect(imperial.days.map((each) => [each.low, each.high])).toEqual([
+      [32, expect.closeTo(50, 9)],
+      [expect.closeTo(-40, 9), expect.closeTo(212, 9)],
+    ]);
+  });
+
+  it('has its wind in miles an hour, and keeps everything else', () => {
+    expect(imperial.current.windSpeed).toBeCloseTo(12.43, 2);
+    expect(imperial.current.condition).toBe(metric.current.condition);
+    expect(imperial.current.observedAt).toBe(metric.current.observedAt);
+    expect(imperial.days.map((each) => [each.date, each.condition, each.precipitationChance])).toEqual([
+      ['2026-11-20', 'overcast', 46],
+      ['2026-11-21', 'overcast', undefined],
+    ]);
+  });
+
+  it('is the same forecast in metric, since it is held in metric', () => {
+    expect(forecastInUnits(metric, 'metric')).toEqual(metric);
   });
 });

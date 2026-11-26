@@ -8,23 +8,27 @@ export const places = {
   ],
 };
 
-/** A week starting Friday 20 November 2026, measured that morning. */
+/**
+ * A week starting Friday 20 November 2026, measured that morning, in metric
+ * units as the app asks for it. Right now it is 2.1 °C (36 °F), feels like
+ * −0.6 °C (31 °F), with wind at 7.1 km/h (4 mph).
+ */
 export function forecast(): Record<string, unknown> {
   const days = Array.from({ length: 7 }, (_, i) => i);
   return {
     current: {
       time: '2026-11-20T09:00',
-      temperature_2m: 35.8,
-      apparent_temperature: 31.3,
+      temperature_2m: 2.1,
+      apparent_temperature: -0.6,
       weather_code: 0,
-      wind_speed_10m: 4.4,
+      wind_speed_10m: 7.1,
       is_day: 1,
     },
     daily: {
       time: days.map((i) => `2026-11-${20 + i}`),
       weather_code: days.map((i) => (i === 2 ? 61 : 0)),
-      temperature_2m_max: days.map((i) => 62 + i),
-      temperature_2m_min: days.map((i) => 27 + i),
+      temperature_2m_max: days.map((i) => 17 + i),
+      temperature_2m_min: days.map((i) => -3 + i),
       precipitation_probability_max: days.map((i) => (i === 2 ? 80 : 0)),
     },
   };

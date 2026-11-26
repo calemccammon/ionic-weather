@@ -38,7 +38,7 @@ it('shows a selected place at once, and its forecast when that arrives', async (
   await settle();
 
   expect(temperature(home)).toBe('36°F');
-  expect(weather.forecastRequests).toEqual([{ latitude: 35.6, longitude: -82.55, units: 'imperial' }]);
+  expect(weather.forecastRequests).toEqual([{ latitude: 35.6, longitude: -82.55 }]);
 });
 
 it('selects a point picked off the map by its coordinates', async () => {
@@ -103,25 +103,42 @@ it('goes back to the start when the place is cleared, and drops the forecast on 
   expect(home.state()).toEqual({ units: 'fahrenheit', place: null, forecast: { kind: 'idle' } });
 });
 
-it('asks for the forecast again in other units, and remembers the choice', async () => {
+it('shows the forecast already held in other units, without asking again, and remembers the choice', async () => {
   const { home, weather, settings } = makeViewModels();
   weather.forecastToReturn = sampleForecast();
   home.select(asheville);
   await settle();
   const place = home.state().place;
+  expect(temperature(home)).toBe('36°F');
 
   home.setUnits('celsius');
 
+  // At once: no loading, no request.
   expect(home.state().units).toBe('celsius');
-  expect(home.state().forecast).toEqual({ kind: 'loading' });
+  expect(temperature(home)).toBe('2°C');
   // The very same place, so the map has no reason to move.
   expect(home.state().place).toBe(place);
+  await settle();
+  expect(weather.forecastRequests).toHaveLength(1);
+  expect(settings.saved).toEqual(['metric']);
 
+  home.setUnits('fahrenheit');
+
+  expect(temperature(home)).toBe('36°F');
+  expect(weather.forecastRequests).toHaveLength(1);
+});
+
+it('shows a forecast still on its way in the units chosen meanwhile', async () => {
+  const { home, weather } = makeViewModels();
+  home.select(asheville);
+
+  home.setUnits('celsius');
+  expect(home.state().forecast).toEqual({ kind: 'loading' });
+  weather.forecasts[0]?.resolve(sampleForecast());
   await settle();
 
-  expect(temperature(home)).toBe('36°C');
-  expect(weather.forecastRequests.map((request) => request.units)).toEqual(['imperial', 'metric']);
-  expect(settings.saved).toEqual(['metric']);
+  expect(temperature(home)).toBe('2°C');
+  expect(weather.forecastRequests).toHaveLength(1);
 });
 
 it('does nothing when the units already shown are chosen', async () => {
@@ -157,7 +174,7 @@ it('still uses units that could not be saved, for now', async () => {
   home.setUnits('celsius');
   await settle();
 
-  expect(temperature(home)).toBe('36°C');
+  expect(temperature(home)).toBe('2°C');
   expect(settings.saved).toEqual([]);
 });
 
