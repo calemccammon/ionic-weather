@@ -1,6 +1,6 @@
 import { day, sampleForecast } from '../../testing/fakes';
 
-import { forecastInUnits, isToday } from './forecast';
+import { inUnits, isToday } from './forecast';
 import { normalizeLongitude, placeFromCoordinates } from './place';
 import { unitsForCountry } from './units';
 
@@ -59,7 +59,7 @@ describe('a forecast', () => {
 
 describe('a forecast in other units', () => {
   const metric = sampleForecast({ days: [{ ...day(20, 0, 10), precipitationChance: 46 }, day(21, -40, 100)] });
-  const imperial = forecastInUnits(
+  const imperial = inUnits(
     { ...metric, current: { ...metric.current, temperature: 10, feelsLike: -40, windSpeed: 20 } },
     'imperial',
   );
@@ -84,6 +84,6 @@ describe('a forecast in other units', () => {
   });
 
   it('is the same forecast in metric, since it is held in metric', () => {
-    expect(forecastInUnits(metric, 'metric')).toEqual(metric);
+    expect(inUnits(metric, 'metric')).toEqual(metric);
   });
 });

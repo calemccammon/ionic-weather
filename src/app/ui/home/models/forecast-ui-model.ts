@@ -1,5 +1,5 @@
 import {
-  forecastInUnits,
+  inUnits,
   isToday,
   type CurrentConditions,
   type DailyForecast,
@@ -68,7 +68,7 @@ export interface DayUiModel {
  */
 export function forecastUiModelFrom(metric: Forecast, units: Units, language: string): ForecastUiModel {
   // Converted before anything is rounded.
-  const forecast = forecastInUnits(metric, units);
+  const forecast = inUnits(metric, units);
   const { days } = forecast;
   // The whole week's range, so each day's bar shows where it sits in it.
   const weekLow = days.length === 0 ? 0 : Math.min(...days.map((day) => day.low));

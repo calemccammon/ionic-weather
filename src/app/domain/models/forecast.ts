@@ -31,7 +31,7 @@ export interface DailyForecast {
  * Current conditions and the days ahead for one place.
  *
  * A forecast is fetched and held in metric units: degrees Celsius and
- * kilometres an hour. `forecastInUnits` gives the same forecast in another
+ * kilometres an hour. `inUnits` gives the same forecast in another
  * system, so changing units never needs the network.
  */
 export interface Forecast {
@@ -56,7 +56,7 @@ function fahrenheit(celsius: number): number {
  * A metric forecast with its temperatures and wind speed in `units`. Nothing
  * is rounded; the chance of precipitation, a percentage, stays as it is.
  */
-export function forecastInUnits(forecast: Forecast, units: Units): Forecast {
+export function inUnits(forecast: Forecast, units: Units): Forecast {
   if (units === 'metric') return forecast;
   const { current, days } = forecast;
   return {
