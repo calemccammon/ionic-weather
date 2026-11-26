@@ -1,4 +1,10 @@
-import { isToday, type CurrentConditions, type DailyForecast, type Forecast } from '../../../domain/models/forecast';
+import {
+  inUnits,
+  isToday,
+  type CurrentConditions,
+  type DailyForecast,
+  type Forecast,
+} from '../../../domain/models/forecast';
 import type { Units } from '../../../domain/models/units';
 import { messages } from '../../../l10n/messages';
 import { conditionIcon, conditionLabel, type IconName } from '../../core/weather-condition-ui';
@@ -57,10 +63,12 @@ export interface DayUiModel {
 }
 
 /**
- * Translates a domain forecast for display in `units`. Weekdays are named in
- * `language`, such as "en-US".
+ * Translates a domain forecast, held in metric units, for display in `units`.
+ * Weekdays are named in `language`, such as "en-US".
  */
-export function forecastUiModelFrom(forecast: Forecast, units: Units, language: string): ForecastUiModel {
+export function forecastUiModelFrom(metric: Forecast, units: Units, language: string): ForecastUiModel {
+  // Converted before anything is rounded.
+  const forecast = inUnits(metric, units);
   const { days } = forecast;
   // The whole week's range, so each day's bar shows where it sits in it.
   const weekLow = days.length === 0 ? 0 : Math.min(...days.map((day) => day.low));
@@ -72,6 +80,7 @@ export function forecastUiModelFrom(forecast: Forecast, units: Units, language: 
   };
 }
 
+/** Words current conditions already in `units`. */
 export function currentUiModelFrom(current: CurrentConditions, units: Units): CurrentUiModel {
   const degrees = Math.round(current.temperature);
   const feelsLike = Math.round(current.feelsLike);

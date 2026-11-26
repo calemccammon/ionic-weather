@@ -73,9 +73,10 @@ describe('a forecast', () => {
   it('words the current conditions in metric units, and draws the night sky at night', () => {
     const current = word(sampleForecast({ isDay: false }), 'metric').current;
 
-    expect(current.temperature).toBe('36°C');
-    expect(current.wind).toBe('Wind 4 km/h');
-    expect(current.description).toBe('Now: Clear, 36 degrees Celsius, feels like 31, wind 4 km/h');
+    expect(current.temperature).toBe('2°C');
+    expect(current.feelsLike).toBe('Feels like -1°');
+    expect(current.wind).toBe('Wind 7 km/h');
+    expect(current.description).toBe('Now: Clear, 2 degrees Celsius, feels like -1, wind 7 km/h');
     expect(current.icon).toBe('moon');
   });
 
@@ -97,7 +98,7 @@ describe('a forecast', () => {
   it("shows a day's rounded low and high, and its chance of precipitation if it has one", () => {
     const [today, , sunday] = word().days;
 
-    expect([today?.low, today?.high, today?.chance]).toEqual(['27°', '62°', '']);
+    expect([today?.low, today?.high, today?.chance]).toEqual(['27°', '63°', '']);
     expect(sunday?.chance).toBe('80%');
     expect(sunday?.icon).toBe('rainy');
   });
@@ -105,8 +106,8 @@ describe('a forecast', () => {
   it('makes each day one sentence for a screen reader', () => {
     const [today, , sunday] = word().days;
 
-    expect(today?.description).toBe('Today: Clear, low 27, high 62 degrees');
-    expect(sunday?.description).toBe('Sunday: Rain, low 29, high 64 degrees, 80 percent chance of precipitation');
+    expect(today?.description).toBe('Today: Clear, low 27, high 63 degrees');
+    expect(sunday?.description).toBe('Sunday: Rain, low 30, high 66 degrees, 80 percent chance of precipitation');
   });
 
   it("shows where each day's range sits in the week's", () => {

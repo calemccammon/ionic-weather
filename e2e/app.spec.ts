@@ -141,7 +141,7 @@ test.describe('forecast', () => {
 
     await expect(page.getByLabel('Now: Clear, 36 degrees Fahrenheit, feels like 31, wind 4 mph')).toBeVisible();
     await expect(
-      page.getByLabel('Sunday: Rain, low 29, high 64 degrees, 80 percent chance of precipitation'),
+      page.getByLabel('Sunday: Rain, low 30, high 66 degrees, 80 percent chance of precipitation'),
     ).toBeVisible();
   });
 
@@ -153,14 +153,16 @@ test.describe('forecast', () => {
     await expect(page.getByRole('tab', { name: 'Celsius and km/h' })).toBeVisible();
     await page.locator('ion-segment-button', { hasText: '°C' }).click();
 
-    await expect(page.getByText('36°C')).toBeVisible();
-    await expect(page.getByText('Wind 4 km/h')).toBeVisible();
-    expect(service.forecasts.at(-1)?.searchParams.get('temperature_unit')).toBe('celsius');
+    await expect(page.getByText('2°C')).toBeVisible();
+    await expect(page.getByText('Wind 7 km/h')).toBeVisible();
+    // Converted on the device: the forecast is not asked for again.
+    expect(service.forecasts).toHaveLength(1);
+    expect(service.forecasts[0]?.searchParams.get('temperature_unit')).toBe('celsius');
 
     await page.reload();
     await chooseAsheville(page);
 
-    await expect(page.getByText('36°C')).toBeVisible();
+    await expect(page.getByText('2°C')).toBeVisible();
   });
 });
 

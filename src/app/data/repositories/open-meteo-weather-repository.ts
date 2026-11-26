@@ -1,6 +1,5 @@
 import type { Forecast } from '../../domain/models/forecast';
 import type { Place } from '../../domain/models/place';
-import type { Units } from '../../domain/models/units';
 import { WeatherError, type WeatherRepository } from '../../domain/repositories/weather-repository';
 import { forecastDtoFromJson, forecastDtoToDomain } from '../models/forecast-dto';
 import { FormatError, isAnything, readList, readObject, type JsonObject } from '../models/json-reading';
@@ -55,8 +54,7 @@ export class OpenMeteoWeatherRepository implements WeatherRepository {
     });
   }
 
-  async forecast(request: { latitude: number; longitude: number; units: Units }): Promise<Forecast> {
-    const metric = request.units === 'metric';
+  async forecast(request: { latitude: number; longitude: number }): Promise<Forecast> {
     const body = await this.get(forecastUrl, {
       latitude: String(request.latitude),
       longitude: String(request.longitude),
@@ -64,8 +62,10 @@ export class OpenMeteoWeatherRepository implements WeatherRepository {
       daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
       forecast_days: '7',
       timezone: 'auto',
-      temperature_unit: metric ? 'celsius' : 'fahrenheit',
-      wind_speed_unit: metric ? 'kmh' : 'mph',
+      // Always metric: the app converts on the device, so changing units
+      // needs no new request.
+      temperature_unit: 'celsius',
+      wind_speed_unit: 'kmh',
     });
     return read(() => forecastDtoToDomain(forecastDtoFromJson(body)));
   }

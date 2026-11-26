@@ -14,16 +14,20 @@ export const asheville: Place = {
 };
 export const ashford: Place = { name: 'Ashford', latitude: 51.15, longitude: 0.87 };
 
-/** A week starting Friday 20 November 2026, measured that morning. */
+/**
+ * A week starting Friday 20 November 2026, measured that morning, in metric
+ * units as the repository gives it. Right now it is 2.1 °C (36 °F), feels
+ * like −0.6 °C (31 °F), with wind at 7.1 km/h (4 mph).
+ */
 export function sampleForecast(
   options: { days?: DailyForecast[]; isDay?: boolean; observedAt?: string } = {},
 ): Forecast {
   return {
     current: {
       observedAt: options.observedAt ?? '2026-11-20T09:00',
-      temperature: 35.8,
-      feelsLike: 31.3,
-      windSpeed: 4.4,
+      temperature: 2.1,
+      feelsLike: -0.6,
+      windSpeed: 7.1,
       condition: 'clear',
       isDay: options.isDay ?? true,
     },
@@ -31,8 +35,8 @@ export function sampleForecast(
       options.days ??
       Array.from({ length: 7 }, (_, i) => ({
         date: `2026-11-${20 + i}`,
-        low: 27 + i,
-        high: 62 + i,
+        low: -3 + i,
+        high: 17 + i,
         condition: i === 2 ? ('rain' as const) : ('clear' as const),
         precipitationChance: i === 2 ? 80 : 0,
       })),
@@ -77,7 +81,7 @@ export class FakeWeatherRepository implements WeatherRepository {
   /** Every unanswered search, in the order they were sent. */
   readonly searchCalls: Deferred<Place[]>[] = [];
   readonly forecasts: Deferred<Forecast>[] = [];
-  readonly forecastRequests: { latitude: number; longitude: number; units: Units }[] = [];
+  readonly forecastRequests: { latitude: number; longitude: number }[] = [];
 
   /** When set, searches answer with this at once. */
   placesToReturn?: Place[];
@@ -98,7 +102,7 @@ export class FakeWeatherRepository implements WeatherRepository {
     return deferred.promise;
   }
 
-  forecast(request: { latitude: number; longitude: number; units: Units }): Promise<Forecast> {
+  forecast(request: { latitude: number; longitude: number }): Promise<Forecast> {
     this.forecastRequests.push(request);
     if (this.failure !== undefined) return Promise.reject(this.failure);
     if (this.forecastToReturn !== undefined) return Promise.resolve(this.forecastToReturn);

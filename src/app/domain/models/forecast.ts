@@ -1,3 +1,4 @@
+import type { Units } from './units';
 import type { WeatherCondition } from './weather-condition';
 
 /** The weather right now at a place. */
@@ -26,7 +27,13 @@ export interface DailyForecast {
   readonly precipitationChance?: number;
 }
 
-/** Current conditions and the days ahead for one place. */
+/**
+ * Current conditions and the days ahead for one place.
+ *
+ * A forecast is fetched and held in metric units: degrees Celsius and
+ * kilometres an hour. `inUnits` gives the same forecast in another
+ * system, so changing units never needs the network.
+ */
 export interface Forecast {
   readonly current: CurrentConditions;
   readonly days: readonly DailyForecast[];
@@ -35,4 +42,30 @@ export interface Forecast {
 /** Whether `day` is the day the forecast's current conditions were measured on. */
 export function isToday(forecast: Forecast, day: DailyForecast): boolean {
   return forecast.current.observedAt.slice(0, 10) === day.date;
+}
+
+const fahrenheitPerCelsius = 1.8;
+const freezingFahrenheit = 32;
+const milesPerKilometre = 0.621371;
+
+function fahrenheit(celsius: number): number {
+  return celsius * fahrenheitPerCelsius + freezingFahrenheit;
+}
+
+/**
+ * A metric forecast with its temperatures and wind speed in `units`. Nothing
+ * is rounded; the chance of precipitation, a percentage, stays as it is.
+ */
+export function inUnits(forecast: Forecast, units: Units): Forecast {
+  if (units === 'metric') return forecast;
+  const { current, days } = forecast;
+  return {
+    current: {
+      ...current,
+      temperature: fahrenheit(current.temperature),
+      feelsLike: fahrenheit(current.feelsLike),
+      windSpeed: current.windSpeed * milesPerKilometre,
+    },
+    days: days.map((day) => ({ ...day, low: fahrenheit(day.low), high: fahrenheit(day.high) })),
+  };
 }

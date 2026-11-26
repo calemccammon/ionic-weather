@@ -16,6 +16,9 @@ import { unitsUiModelFrom, unitsUiModelToDomain, type UnitsUiModel } from '../mo
 /**
  * Holds the selected place and the chosen units, and loads the forecast.
  *
+ * The forecast is held as it came, in metric units, and converted for the
+ * screen; changing units words it again without asking for it again.
+ *
  * Selecting a place while an earlier forecast is still on its way throws the
  * earlier answer away when it arrives.
  */
@@ -27,6 +30,8 @@ export class HomeViewModel {
 
   private place: Place | null = null;
   private units: Units = inject(GetUnits).execute(inject(DEVICE_COUNTRY));
+  /** The forecast on screen, in metric units, or null when none is. */
+  private held: Forecast | null = null;
 
   /**
    * Counts forecast requests, so an answer can tell whether it is still the
@@ -56,13 +61,14 @@ export class HomeViewModel {
 
   clear(): void {
     this.place = null;
+    this.held = null;
     this.request++;
     this.current.set({ units: unitsUiModelFrom(this.units), place: null, forecast: { kind: 'idle' } });
   }
 
   /**
    * Shows forecasts in `units` from now on, and remembers the choice. The
-   * forecast on screen is asked for again in them.
+   * forecast on screen is converted at once, with no new request.
    */
   setUnits(units: UnitsUiModel): void {
     const chosen = unitsUiModelToDomain(units);
@@ -72,12 +78,13 @@ export class HomeViewModel {
     // carries on with the new.
     this.saveUnits.execute(chosen).catch(() => undefined);
 
-    const shown = this.current().place;
-    if (shown === null) {
-      this.current.update((state) => ({ ...state, units }));
-    } else {
+    const state = this.current();
+    if (state.place !== null && state.forecast.kind === 'loaded' && this.held !== null) {
       // The same place as before, so the map has no reason to move.
-      void this.load(shown);
+      this.show(state.place, chosen, { kind: 'loaded', forecast: this.word(this.held, chosen) });
+    } else {
+      // A forecast still on its way is worded in these units when it comes.
+      this.current.update((each) => ({ ...each, units }));
     }
   }
 
@@ -91,16 +98,20 @@ export class HomeViewModel {
     const place = this.place;
     if (place === null) return;
     const request = ++this.request;
-    const units = this.units;
-    this.show(shown, units, { kind: 'loading' });
+    this.held = null;
+    this.show(shown, this.units, { kind: 'loading' });
 
+    let forecast: Forecast | null = null;
     let outcome: ForecastState;
     try {
-      outcome = { kind: 'loaded', forecast: this.word(await this.getForecast.execute(place, units), units) };
+      forecast = await this.getForecast.execute(place);
+      outcome = { kind: 'loaded', forecast: this.word(forecast, this.units) };
     } catch (error) {
       outcome = { kind: 'failed', message: messageForError(error) };
     }
-    if (request === this.request) this.show(shown, units, outcome);
+    if (request !== this.request) return;
+    this.held = forecast;
+    this.show(shown, this.units, outcome);
   }
 
   private word(forecast: Forecast, units: Units) {
